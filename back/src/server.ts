@@ -1,5 +1,6 @@
 import express from "express";
 import serveIndex from "serve-index";
+import { api } from "./api";
 
 const app = express();
 const port = +(process.env.LL_PORT || 3000);
@@ -10,6 +11,8 @@ app.use((req, res, next) => {
   res.setHeader("X-Truc", "bidule");
   next();
 });
+
+app.use("/api", api);
 
 app.use(express.static(wwwDir));
 app.use(serveIndex(wwwDir, { icons: true }));
