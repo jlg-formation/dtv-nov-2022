@@ -6,7 +6,7 @@ const port = 3000;
 const wwwDir = ".";
 
 app.use((req, res, next) => {
-  console.log("req: ", req);
+  console.log("req: ", req.url);
   res.setHeader("X-Truc", "bidule");
   next();
 });
