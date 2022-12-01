@@ -5,12 +5,18 @@ import { onMounted, ref } from "vue";
 const el = ref();
 
 onMounted(async () => {
-  const map = L.map(el.value).setView([51.505, -0.09], 13);
-  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-    attribution:
-      '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-  }).addTo(map);
+  const map = L.map(el.value).setView(
+    [48.896898068574274, 2.0921415972909467],
+    13
+  );
+
+  L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+    {
+      attribution: "Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ",
+      maxZoom: 16,
+    }
+  ).addTo(map);
 });
 </script>
 
