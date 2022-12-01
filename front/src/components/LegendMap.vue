@@ -1,12 +1,12 @@
 <script lang="ts" setup>
-import type { ExplorerSegment } from "@/interfaces/ExplorerSegment";
+import type { DetailedSegment } from "@/interfaces/DetailedSegment";
 import { getCurrentPosition, getStravaBoundsFromLeafletBounds } from "@/misc";
+import polyline from "@mapbox/polyline";
 import L from "leaflet";
 import { onMounted, ref } from "vue";
-import polyline from "@mapbox/polyline";
 
 const el = ref();
-const explorerSegments = ref<ExplorerSegment[]>([]);
+const detailedSegments = ref<DetailedSegment[]>([]);
 
 onMounted(async () => {
   let location: L.LatLngExpression = [45, 0];
@@ -28,7 +28,7 @@ onMounted(async () => {
     }
   ).addTo(map);
 
-  const segmentMap = new Map<number, ExplorerSegment>();
+  const segmentMap = new Map<number, DetailedSegment>();
   const group = L.layerGroup([]);
   group.addTo(map);
 
@@ -42,7 +42,7 @@ onMounted(async () => {
     console.log("response: ", response);
     const json = await response.json();
     console.log("json: ", json);
-    const segments: ExplorerSegment[] = json.segments;
+    const segments: DetailedSegment[] = json;
 
     for (const s of segments) {
       console.log("s: ", s);
@@ -52,10 +52,18 @@ onMounted(async () => {
     group.clearLayers();
 
     for (const s of segmentMap.values()) {
-      const segmentPolyline = polyline.decode(s.points);
+      const segmentPolyline = polyline.decode(s.map.polyline);
       group.addLayer(L.polyline(segmentPolyline, { color: "green" }));
     }
-    explorerSegments.value = [...segmentMap.values()];
+    detailedSegments.value = [...segmentMap.values()].sort((a, b) => {
+      const d1 =
+        a.distance *
+        (a.local_legend?.effort_count ? +a.local_legend?.effort_count : 2);
+      const d2 =
+        b.distance *
+        (b.local_legend?.effort_count ? +b.local_legend?.effort_count : 2);
+      return Math.sign(d1 - d2);
+    });
   };
 
   await getSegments();
@@ -69,8 +77,18 @@ onMounted(async () => {
 <template>
   <div class="legend-map">
     <div class="list">
-      <div class="segment" v-for="s in explorerSegments" :key="s.id">
-        {{ s.name }}
+      <div class="segment" v-for="s in detailedSegments" :key="s.id">
+        <span>{{ s.name }}</span>
+        <span>{{ s.local_legend?.title }}</span>
+        <span>{{ s.local_legend?.effort_count }}</span>
+        <span>{{ s.distance }}</span>
+        <span
+          >Effort a faire :
+          {{
+            s.distance *
+            (s.local_legend?.effort_count ? +s.local_legend?.effort_count : 2)
+          }}</span
+        >
       </div>
     </div>
     <div class="map" ref="el"></div>
@@ -100,6 +118,9 @@ onMounted(async () => {
       &:hover {
         background-color: #ddd;
       }
+
+      display: flex;
+      flex-flow: column;
     }
   }
 

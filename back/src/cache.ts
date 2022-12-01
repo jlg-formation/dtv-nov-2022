@@ -16,5 +16,5 @@ export const loadCache = () => {
   return segmentMap;
 };
 export const saveCache = (cache: Map<number, DetailedSegment>) => {
-  fs.writeFileSync(FILENAME, JSON.stringify([...cache.values()]));
+  fs.writeFileSync(FILENAME, JSON.stringify([...cache.values()], undefined, 2));
 };
