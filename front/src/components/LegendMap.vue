@@ -27,22 +27,40 @@ onMounted(async () => {
     }
   ).addTo(map);
 
-  const bounds = map.getBounds();
-  const stravaBounds = getStravaBoundsFromLeafletBounds(bounds);
+  const segmentMap = new Map<number, ExplorerSegment>();
+  const group = L.layerGroup([]);
+  group.addTo(map);
 
-  const response = await fetch(
-    `/api/strava/segments/explore?bounds=${stravaBounds}`
-  );
-  console.log("response: ", response);
-  const json = await response.json();
-  console.log("json: ", json);
-  const segments: ExplorerSegment[] = json.segments;
+  const getSegments = async () => {
+    const bounds = map.getBounds();
+    const stravaBounds = getStravaBoundsFromLeafletBounds(bounds);
 
-  for (const s of segments) {
-    console.log("s: ", s);
-    const segmentPolyline = polyline.decode(s.points);
-    L.polyline(segmentPolyline, { color: "green" }).addTo(map);
-  }
+    const response = await fetch(
+      `/api/strava/segments/explore?bounds=${stravaBounds}`
+    );
+    console.log("response: ", response);
+    const json = await response.json();
+    console.log("json: ", json);
+    const segments: ExplorerSegment[] = json.segments;
+
+    for (const s of segments) {
+      console.log("s: ", s);
+      segmentMap.set(s.id, s);
+    }
+
+    group.clearLayers();
+
+    for (const s of segmentMap.values()) {
+      const segmentPolyline = polyline.decode(s.points);
+      group.addLayer(L.polyline(segmentPolyline, { color: "green" }));
+    }
+  };
+
+  await getSegments();
+
+  map.on("moveend", async () => {
+    await getSegments();
+  });
 });
 </script>
 
