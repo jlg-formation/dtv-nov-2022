@@ -15,13 +15,15 @@ app.get("/date", (req, res) => {
 app.get("/strava/segments/explore", (req, res) => {
   (async () => {
     try {
+      const bounds = req.query.bounds as string;
+      console.log("bounds: ", bounds);
       const response = await got
         .get(stravaUrl + "/segments/explore", {
           headers: {
             Authorization: "Bearer " + token,
           },
           searchParams: {
-            bounds: "0,0,10,10",
+            bounds: bounds,
           },
         })
         .json();
