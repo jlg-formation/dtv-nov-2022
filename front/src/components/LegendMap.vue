@@ -1,7 +1,9 @@
 <script lang="ts" setup>
+import type { ExplorerSegment } from "@/interfaces/ExplorerSegment";
 import { getCurrentPosition, getStravaBoundsFromLeafletBounds } from "@/misc";
 import L from "leaflet";
 import { onMounted, ref } from "vue";
+import polyline from "@mapbox/polyline";
 
 const el = ref();
 
@@ -31,6 +33,13 @@ onMounted(async () => {
   console.log("response: ", response);
   const json = await response.json();
   console.log("json: ", json);
+  const segments: ExplorerSegment[] = json.segments;
+
+  for (const s of segments) {
+    console.log("s: ", s);
+    const segmentPolyline = polyline.decode(s.points);
+    L.polyline(segmentPolyline, { color: "green" }).addTo(map);
+  }
 });
 </script>
 
