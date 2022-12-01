@@ -6,6 +6,7 @@ import { onMounted, ref } from "vue";
 import polyline from "@mapbox/polyline";
 
 const el = ref();
+const explorerSegments = ref<ExplorerSegment[]>([]);
 
 onMounted(async () => {
   let location: L.LatLngExpression = [45, 0];
@@ -54,6 +55,7 @@ onMounted(async () => {
       const segmentPolyline = polyline.decode(s.points);
       group.addLayer(L.polyline(segmentPolyline, { color: "green" }));
     }
+    explorerSegments.value = [...segmentMap.values()];
   };
 
   await getSegments();
@@ -66,7 +68,11 @@ onMounted(async () => {
 
 <template>
   <div class="legend-map">
-    <div class="list"></div>
+    <div class="list">
+      <div class="segment" v-for="s in explorerSegments" :key="s.id">
+        Nom: {{ s.name }}
+      </div>
+    </div>
     <div class="map" ref="el"></div>
   </div>
 </template>
@@ -80,6 +86,8 @@ onMounted(async () => {
   .list {
     background-color: #eee;
     width: 20em;
+    height: 100vh;
+    overflow-y: scroll;
   }
 
   .map {
