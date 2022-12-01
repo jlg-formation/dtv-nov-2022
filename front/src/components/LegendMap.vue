@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { getStravaBoundsFromLeafletBounds } from "@/misc";
 import L from "leaflet";
 import { onMounted, ref } from "vue";
 
@@ -17,6 +18,16 @@ onMounted(async () => {
       maxZoom: 16,
     }
   ).addTo(map);
+
+  const bounds = map.getBounds();
+  const stravaBounds = getStravaBoundsFromLeafletBounds(bounds);
+
+  const response = await fetch(
+    `/api/strava/segments/explore?bounds=${stravaBounds}`
+  );
+  console.log("response: ", response);
+  const json = await response.json();
+  console.log("json: ", json);
 });
 </script>
 
