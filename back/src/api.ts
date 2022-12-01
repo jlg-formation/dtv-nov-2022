@@ -24,6 +24,7 @@ app.get("/strava/segments/explore", (req, res) => {
           },
           searchParams: {
             bounds: bounds,
+            activity_type: "running",
           },
         })
         .json();
