@@ -7,3 +7,11 @@ export const getStravaBoundsFromLeafletBounds = (
     bounds.getNorthEast().lat
   },${bounds.getNorthEast().lng}`;
 };
+
+export const getCurrentPosition = (
+  options?: PositionOptions
+): Promise<GeolocationPosition> => {
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(resolve, reject, options);
+  });
+};

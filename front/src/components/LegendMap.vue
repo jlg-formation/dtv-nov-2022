@@ -1,13 +1,16 @@
 <script lang="ts" setup>
-import { getStravaBoundsFromLeafletBounds } from "@/misc";
+import { getCurrentPosition, getStravaBoundsFromLeafletBounds } from "@/misc";
 import L from "leaflet";
 import { onMounted, ref } from "vue";
 
 const el = ref();
 
 onMounted(async () => {
+  const pos = await getCurrentPosition();
+  console.log("pos: ", pos);
+
   const map = L.map(el.value).setView(
-    [48.896898068574274, 2.0921415972909467],
+    [pos.coords.latitude, pos.coords.longitude],
     13
   );
 
