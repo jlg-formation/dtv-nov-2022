@@ -8,13 +8,16 @@ import polyline from "@mapbox/polyline";
 const el = ref();
 
 onMounted(async () => {
-  const pos = await getCurrentPosition();
-  console.log("pos: ", pos);
+  let location: L.LatLngExpression = [45, 0];
+  try {
+    const pos = await getCurrentPosition();
+    console.log("pos: ", pos);
+    location = [pos.coords.latitude, pos.coords.longitude];
+  } catch (err) {
+    console.log("err: ", err);
+  }
 
-  const map = L.map(el.value).setView(
-    [pos.coords.latitude, pos.coords.longitude],
-    13
-  );
+  const map = L.map(el.value).setView(location, 13);
 
   L.tileLayer(
     "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
