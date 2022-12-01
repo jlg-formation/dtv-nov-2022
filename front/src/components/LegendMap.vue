@@ -70,7 +70,7 @@ onMounted(async () => {
   <div class="legend-map">
     <div class="list">
       <div class="segment" v-for="s in explorerSegments" :key="s.id">
-        Nom: {{ s.name }}
+        {{ s.name }}
       </div>
     </div>
     <div class="map" ref="el"></div>
@@ -84,10 +84,23 @@ onMounted(async () => {
   display: flex;
 
   .list {
-    background-color: #eee;
     width: 20em;
     height: 100vh;
     overflow-y: scroll;
+    padding: 0;
+
+    .segment {
+      cursor: pointer;
+      padding: 0.5em 0.5em;
+
+      &:nth-child(even) {
+        background-color: #eee;
+      }
+
+      &:hover {
+        background-color: #ddd;
+      }
+    }
   }
 
   .map {
