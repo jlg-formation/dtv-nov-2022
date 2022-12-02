@@ -7,6 +7,7 @@ import { onMounted, ref } from "vue";
 
 const el = ref();
 const detailedSegments = ref<DetailedSegment[]>([]);
+const selectedSegment = ref<DetailedSegment | undefined>(undefined);
 
 onMounted(async () => {
   let location: L.LatLngExpression = [45, 0];
@@ -79,6 +80,11 @@ onMounted(async () => {
 
 const selectSegment = (s: DetailedSegment) => {
   console.log("click s: ", s);
+  if (selectedSegment.value?.id === s.id) {
+    selectedSegment.value = undefined;
+    return;
+  }
+  selectedSegment.value = s;
 };
 </script>
 
@@ -90,6 +96,7 @@ const selectSegment = (s: DetailedSegment) => {
         v-for="s in detailedSegments"
         :key="s.id"
         @click="selectSegment(s)"
+        :class="{ selected: s === selectedSegment }"
       >
         <span>{{ s.name }}</span>
         <span>{{ s.local_legend?.title }}</span>
@@ -130,6 +137,10 @@ const selectSegment = (s: DetailedSegment) => {
 
       &:hover {
         background-color: #ddd;
+      }
+
+      &.selected {
+        background-color: #ccc;
       }
 
       display: flex;
