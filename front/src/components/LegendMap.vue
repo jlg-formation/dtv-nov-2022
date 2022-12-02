@@ -154,7 +154,7 @@ watch(selectedSegment, async () => {
           <div class="name">{{ capitalizeFirstLetter(s.name) }}</div>
           <div class="legend" v-if="s.local_legend">
             Légende : {{ s.local_legend?.title }} ({{
-              s.local_legend?.effort_count.toLocaleString("fr-FR")
+              (+s.local_legend?.effort_count).toLocaleString("fr-FR")
             }}
             x {{ s.distance.toLocaleString("fr-FR") }} m)
           </div>
