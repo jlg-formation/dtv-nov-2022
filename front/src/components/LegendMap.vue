@@ -27,7 +27,12 @@ const redraw = () => {
     }
 
     const segmentPolyline = polyline.decode(s.map.polyline);
-    group.addLayer(L.polyline(segmentPolyline, { color: color }));
+    const p = L.polyline(segmentPolyline, { color: color });
+    p.on("click", (...args) => {
+      console.log("polyline click args: ", args);
+      selectSegment(s, false);
+    });
+    group.addLayer(p);
   }
 };
 
@@ -100,7 +105,7 @@ onMounted(async () => {
   });
 });
 
-const selectSegment = (s: DetailedSegment) => {
+const selectSegment = (s: DetailedSegment, rezoom = true) => {
   console.log("click s: ", s);
   if (selectedSegment.value?.id === s.id) {
     selectedSegment.value = undefined;
@@ -108,7 +113,9 @@ const selectSegment = (s: DetailedSegment) => {
   }
   selectedSegment.value = s;
 
-  refMap.value?.setView(selectedSegment.value.start_latlng);
+  if (rezoom) {
+    refMap.value?.setView(selectedSegment.value.start_latlng);
+  }
 };
 
 watch(selectedSegment, async () => {
