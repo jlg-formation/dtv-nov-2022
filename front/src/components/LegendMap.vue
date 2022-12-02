@@ -113,6 +113,12 @@ onMounted(async () => {
     }
     await getSegments();
   });
+
+  map.on("contextmenu", (event: { latlng: L.LatLngExpression }) => {
+    console.log("event: ", event);
+    console.log("context menu");
+    L.popup().setLatLng(event.latlng).setContent(`<p>coucou</p>`);
+  });
 });
 
 const selectSegment = (s: DetailedSegment, rezoom = true) => {
