@@ -1,6 +1,10 @@
 <script lang="ts" setup>
 import type { DetailedSegment } from "@/interfaces/DetailedSegment";
-import { getCurrentPosition, getStravaBoundsFromLeafletBounds } from "@/misc";
+import {
+  capitalizeFirstLetter,
+  getCurrentPosition,
+  getStravaBoundsFromLeafletBounds,
+} from "@/misc";
 import polyline from "@mapbox/polyline";
 import L from "leaflet";
 import { onMounted, ref, watch } from "vue";
@@ -10,7 +14,14 @@ const detailedSegments = ref<DetailedSegment[]>([]);
 const selectedSegment = ref<DetailedSegment | undefined>(undefined);
 const group = L.layerGroup([]);
 const refMap = ref<L.Map | undefined>(undefined);
-const itemRefs = ref<DetailedSegment[]>([]);
+
+const remainingEffort = (s: DetailedSegment): number => {
+  return Math.floor(
+    s.distance *
+      (2 * (+s.local_legend?.effort_count ? +s.local_legend?.effort_count : 1) +
+        1)
+  );
+};
 
 const redraw = () => {
   group.clearLayers();
@@ -88,22 +99,14 @@ onMounted(async () => {
       return;
     }
     const json = await response.json();
-    console.log("json: ", json);
     const segments: DetailedSegment[] = json;
 
     for (const s of segments) {
-      console.log("s: ", s);
       segmentMap.set(s.id, s);
     }
 
     detailedSegments.value = [...segmentMap.values()].sort((a, b) => {
-      const d1 =
-        a.distance *
-        (a.local_legend?.effort_count ? +a.local_legend?.effort_count : 2);
-      const d2 =
-        b.distance *
-        (b.local_legend?.effort_count ? +b.local_legend?.effort_count : 2);
-      return Math.sign(d1 - d2);
+      return Math.sign(remainingEffort(a) - remainingEffort(b));
     });
 
     redraw();
@@ -120,7 +123,6 @@ onMounted(async () => {
 });
 
 const selectSegment = (s: DetailedSegment, rezoom = true) => {
-  console.log("click s: ", s);
   if (selectedSegment.value?.id === s.id) {
     selectedSegment.value = undefined;
     return;
@@ -148,17 +150,26 @@ watch(selectedSegment, async () => {
         :class="{ selected: s === selectedSegment }"
         :id="'segment-' + s.id"
       >
-        <span>{{ s.name }}</span>
-        <span>{{ s.local_legend?.title }}</span>
-        <span>{{ s.local_legend?.effort_count }}</span>
-        <span>{{ s.distance }}</span>
-        <span
-          >Effort a faire :
-          {{
-            s.distance *
-            (s.local_legend?.effort_count ? +s.local_legend?.effort_count : 2)
-          }}</span
-        >
+        <div class="first">
+          <div class="name">{{ capitalizeFirstLetter(s.name) }}</div>
+          <div class="legend" v-if="s.local_legend">
+            Légende : {{ s.local_legend?.title }} ({{
+              s.local_legend?.effort_count.toLocaleString("fr-FR")
+            }}
+            x {{ s.distance.toLocaleString("fr-FR") }} m)
+          </div>
+          <div class="legend" v-else>
+            Pas de Légende : (0 x
+            {{ s.distance.toLocaleString("fr-FR") }} m)
+          </div>
+        </div>
+        <div class="second">
+          <div class="label">Effort à faire :</div>
+          <div class="value">
+            {{ remainingEffort(s).toLocaleString("fr-FR") }}
+            m
+          </div>
+        </div>
       </div>
     </div>
     <div class="map" ref="el"></div>
@@ -172,17 +183,17 @@ watch(selectedSegment, async () => {
   display: flex;
 
   .list {
-    width: 20em;
+    width: 25em;
     height: 100vh;
     overflow-y: scroll;
     padding: 0;
 
     .segment {
       cursor: pointer;
-      padding: 0.5em 0.5em;
+      padding: 0;
 
       &:nth-child(even) {
-        background-color: #eee;
+        background-color: hsla(0, 0%, 96%, 1);
       }
 
       &:hover {
@@ -194,7 +205,39 @@ watch(selectedSegment, async () => {
       }
 
       display: flex;
-      flex-flow: column;
+      justify-content: space-between;
+
+      .first {
+        max-width: 20em;
+        display: flex;
+        flex-flow: column;
+        padding: 0.5em;
+        .name {
+          font-weight: bold;
+          font-size: 1.2em;
+        }
+        .legend {
+          font-size: 0.8em;
+        }
+      }
+
+      .second {
+        margin: 0.3em;
+        display: flex;
+        flex-flow: column;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5em;
+        border: 0.05em solid green;
+        min-width: 5em;
+        .label {
+          font-size: 0.7em;
+        }
+        .value {
+          color: green;
+          font-weight: bold;
+        }
+      }
     }
   }
 

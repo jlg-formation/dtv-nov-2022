@@ -15,3 +15,7 @@ export const getCurrentPosition = (
     navigator.geolocation.getCurrentPosition(resolve, reject, options);
   });
 };
+
+export const capitalizeFirstLetter = (str: string) => {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
