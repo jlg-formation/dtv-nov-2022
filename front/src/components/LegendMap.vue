@@ -10,6 +10,7 @@ const detailedSegments = ref<DetailedSegment[]>([]);
 const selectedSegment = ref<DetailedSegment | undefined>(undefined);
 const group = L.layerGroup([]);
 const refMap = ref<L.Map | undefined>(undefined);
+const itemRefs = ref<DetailedSegment[]>([]);
 
 const redraw = () => {
   group.clearLayers();
@@ -35,6 +36,14 @@ const redraw = () => {
     clickablePolyline.on("click", (...args) => {
       console.log("polyline click args: ", args);
       selectSegment(s, false);
+      const parent = document.querySelector(".list") as HTMLElement;
+      console.log("parent: ", parent);
+      const elt = document.querySelector("#segment-" + s.id) as HTMLElement;
+      console.log("elt: ", elt);
+      parent.scrollBy({
+        top: elt.getBoundingClientRect().top,
+        behavior: "smooth",
+      });
     });
     group.addLayer(visiblePolyline);
     group.addLayer(clickablePolyline);
@@ -137,6 +146,7 @@ watch(selectedSegment, async () => {
         :key="s.id"
         @click="selectSegment(s)"
         :class="{ selected: s === selectedSegment }"
+        :id="'segment-' + s.id"
       >
         <span>{{ s.name }}</span>
         <span>{{ s.local_legend?.title }}</span>
