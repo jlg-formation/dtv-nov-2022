@@ -3,11 +3,33 @@ import type { DetailedSegment } from "@/interfaces/DetailedSegment";
 import { getCurrentPosition, getStravaBoundsFromLeafletBounds } from "@/misc";
 import polyline from "@mapbox/polyline";
 import L from "leaflet";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 
 const el = ref();
 const detailedSegments = ref<DetailedSegment[]>([]);
 const selectedSegment = ref<DetailedSegment | undefined>(undefined);
+const group = L.layerGroup([]);
+const refMap = ref<L.Map | undefined>(undefined);
+
+const redraw = () => {
+  group.clearLayers();
+
+  for (const s of detailedSegments.value) {
+    let color = "hsla(0, 0%, 70%, 1)";
+    if (
+      selectedSegment.value !== undefined &&
+      selectedSegment.value.id === s.id
+    ) {
+      color = "hsla(120, 100%, 25%, 1)";
+    }
+    if (selectedSegment.value === undefined) {
+      color = "hsla(120, 100%, 25%, 1)";
+    }
+
+    const segmentPolyline = polyline.decode(s.map.polyline);
+    group.addLayer(L.polyline(segmentPolyline, { color: color }));
+  }
+};
 
 onMounted(async () => {
   let location: L.LatLngExpression = [45, 0];
@@ -20,6 +42,7 @@ onMounted(async () => {
   }
 
   const map = L.map(el.value).setView(location, 13);
+  refMap.value = map;
 
   L.tileLayer(
     "https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png",
@@ -31,7 +54,7 @@ onMounted(async () => {
   ).addTo(map);
 
   const segmentMap = new Map<number, DetailedSegment>();
-  const group = L.layerGroup([]);
+
   group.addTo(map);
 
   const getSegments = async () => {
@@ -54,12 +77,6 @@ onMounted(async () => {
       segmentMap.set(s.id, s);
     }
 
-    group.clearLayers();
-
-    for (const s of segmentMap.values()) {
-      const segmentPolyline = polyline.decode(s.map.polyline);
-      group.addLayer(L.polyline(segmentPolyline, { color: "green" }));
-    }
     detailedSegments.value = [...segmentMap.values()].sort((a, b) => {
       const d1 =
         a.distance *
@@ -69,11 +86,16 @@ onMounted(async () => {
         (b.local_legend?.effort_count ? +b.local_legend?.effort_count : 2);
       return Math.sign(d1 - d2);
     });
+
+    redraw();
   };
 
   await getSegments();
 
   map.on("moveend", async () => {
+    if (selectedSegment.value !== undefined) {
+      return;
+    }
     await getSegments();
   });
 });
@@ -85,7 +107,13 @@ const selectSegment = (s: DetailedSegment) => {
     return;
   }
   selectedSegment.value = s;
+
+  refMap.value?.setView(selectedSegment.value.start_latlng);
 };
+
+watch(selectedSegment, async () => {
+  redraw();
+});
 </script>
 
 <template>
