@@ -1,4 +1,5 @@
 import type L from "leaflet";
+import type { DetailedSegment } from "./interfaces/DetailedSegment";
 
 export const getStravaBoundsFromLeafletBounds = (
   bounds: L.LatLngBounds
@@ -18,4 +19,12 @@ export const getCurrentPosition = (
 
 export const capitalizeFirstLetter = (str: string) => {
   return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
+export const remainingEffort = (s: DetailedSegment): number => {
+  return Math.floor(
+    s.distance *
+      (2 * (+s.local_legend?.effort_count ? +s.local_legend?.effort_count : 1) +
+        1)
+  );
 };

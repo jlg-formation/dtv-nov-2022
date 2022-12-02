@@ -4,6 +4,7 @@ import {
   capitalizeFirstLetter,
   getCurrentPosition,
   getStravaBoundsFromLeafletBounds,
+  remainingEffort,
 } from "@/misc";
 import polyline from "@mapbox/polyline";
 import L from "leaflet";
@@ -14,14 +15,6 @@ const detailedSegments = ref<DetailedSegment[]>([]);
 const selectedSegment = ref<DetailedSegment | undefined>(undefined);
 const group = L.layerGroup([]);
 const refMap = ref<L.Map | undefined>(undefined);
-
-const remainingEffort = (s: DetailedSegment): number => {
-  return Math.floor(
-    s.distance *
-      (2 * (+s.local_legend?.effort_count ? +s.local_legend?.effort_count : 1) +
-        1)
-  );
-};
 
 const redraw = () => {
   group.clearLayers();
