@@ -76,12 +76,21 @@ onMounted(async () => {
     await getSegments();
   });
 });
+
+const selectSegment = (s: DetailedSegment) => {
+  console.log("click s: ", s);
+};
 </script>
 
 <template>
   <div class="legend-map">
     <div class="list">
-      <div class="segment" v-for="s in detailedSegments" :key="s.id">
+      <div
+        class="segment"
+        v-for="s in detailedSegments"
+        :key="s.id"
+        @click="selectSegment(s)"
+      >
         <span>{{ s.name }}</span>
         <span>{{ s.local_legend?.title }}</span>
         <span>{{ s.local_legend?.effort_count }}</span>
