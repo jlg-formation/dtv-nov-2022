@@ -21,10 +21,11 @@ onMounted(async () => {
   const map = L.map(el.value).setView(location, 13);
 
   L.tileLayer(
-    "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+    "https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png",
     {
-      attribution: "Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ",
-      maxZoom: 16,
+      maxZoom: 20,
+      attribution:
+        '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
     }
   ).addTo(map);
 
@@ -35,11 +36,14 @@ onMounted(async () => {
   const getSegments = async () => {
     const bounds = map.getBounds();
     const stravaBounds = getStravaBoundsFromLeafletBounds(bounds);
-
     const response = await fetch(
       `/api/strava/segments/explore?bounds=${stravaBounds}`
     );
     console.log("response: ", response);
+    if (response.status >= 400) {
+      console.error("error while getting segments");
+      return;
+    }
     const json = await response.json();
     console.log("json: ", json);
     const segments: DetailedSegment[] = json;
