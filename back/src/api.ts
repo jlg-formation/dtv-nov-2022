@@ -54,7 +54,8 @@ app.get("/strava/segments/explore", (req, res) => {
       res.json(result);
     } catch (err) {
       console.log("err: ", err);
-      res.status(500).end();
+
+      res.json([...cache.values()]);
     }
   })();
 });
