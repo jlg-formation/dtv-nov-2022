@@ -176,14 +176,17 @@ watch(selectedSegment, async () => {
   display: flex;
 
   .list {
+    position: relative;
     width: 25em;
     height: 100vh;
     overflow-y: scroll;
     padding: 0;
 
     .segment {
+      position: relative;
       cursor: pointer;
       padding: 0;
+      border: 0.04em solid transparent;
 
       &:nth-child(even) {
         background-color: hsla(0, 0%, 96%, 1);
@@ -194,7 +197,10 @@ watch(selectedSegment, async () => {
       }
 
       &.selected {
-        background-color: #ccc;
+        z-index: 1;
+        box-shadow: 3px 4px 4px 5px rgba(0, 0, 0, 0.1);
+        background-color: hsla(120, 100%, 10%, 0.2);
+        border-color: black;
       }
 
       display: flex;
