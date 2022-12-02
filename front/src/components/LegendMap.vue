@@ -27,12 +27,17 @@ const redraw = () => {
     }
 
     const segmentPolyline = polyline.decode(s.map.polyline);
-    const p = L.polyline(segmentPolyline, { color: color });
-    p.on("click", (...args) => {
+    const visiblePolyline = L.polyline(segmentPolyline, { color: color });
+    const clickablePolyline = L.polyline(segmentPolyline, {
+      color: "transparent",
+      weight: 20,
+    });
+    clickablePolyline.on("click", (...args) => {
       console.log("polyline click args: ", args);
       selectSegment(s, false);
     });
-    group.addLayer(p);
+    group.addLayer(visiblePolyline);
+    group.addLayer(clickablePolyline);
   }
 };
 
